@@ -1,0 +1,11 @@
+{
+  "name": "rmutr-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix server install --omit=dev",
+    "start": "npm --prefix server start",
+    "seed": "npm --prefix server run seed"
+  },
+  "engines": { "node": ">=18" }
+}

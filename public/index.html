@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RMUTR - ระบบจัดการกิจกรรมในมหาวิทยาลัย</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#0F3324;
+    --green-800:#164A34;
+    --green-700:#1F5F42;
+    --green-100:#E4EFE8;
+    --gold-500:#C89B3C;
+    --gold-100:#F5EBD3;
+    --bg:#F6F5F1;
+    --card:#FFFFFF;
+    --ink:#20241F;
+    --ink-soft:#5B655D;
+    --line:#E2E0D6;
+    --danger:#B24D3E;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--ink);}
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:230px;background:var(--green-900);color:#fff;display:flex;flex-direction:column;padding:24px 0;flex-shrink:0;}
+  .brand{padding:0 22px 22px 22px;border-bottom:1px solid rgba(255,255,255,0.12);margin-bottom:14px;}
+  .brand .mark{display:inline-block;width:34px;height:34px;background:var(--gold-500);border-radius:8px;color:var(--green-900);font-weight:700;text-align:center;line-height:34px;margin-bottom:10px;}
+  .brand h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.2px;}
+  .brand p{font-size:12px;margin:4px 0 0;color:rgba(255,255,255,0.55);}
+  nav{display:flex;flex-direction:column;gap:2px;padding:0 12px;}
+  nav button{all:unset;display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;font-size:14px;color:rgba(255,255,255,0.78);cursor:pointer;}
+  nav button .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);flex-shrink:0;}
+  nav button:hover{background:rgba(255,255,255,0.06);color:#fff;}
+  nav button.active{background:var(--green-700);color:#fff;}
+  nav button.active .dot{background:var(--gold-500);}
+  .sidebar-foot{margin-top:auto;padding:16px 22px 0;font-size:11px;color:rgba(255,255,255,0.4);border-top:1px solid rgba(255,255,255,0.1);}
+  main{flex:1;padding:34px 40px;max-width:1120px;}
+  .page-head{margin-bottom:24px;}
+  .page-head .eyebrow{font-size:12px;color:var(--gold-500);font-weight:600;letter-spacing:.4px;margin-bottom:4px;}
+  .page-head h2{font-size:24px;margin:0 0 6px;font-weight:600;}
+  .page-head p{margin:0;color:var(--ink-soft);font-size:14px;}
+  .grid-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;}
+  .stat .num{font-size:26px;font-weight:700;color:var(--green-800);}
+  .stat .label{font-size:12.5px;color:var(--ink-soft);margin-top:4px;}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:22px;}
+  .panel h3{font-size:15px;margin:0 0 16px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+  .panel h3 .badge{font-size:11px;font-weight:500;color:var(--green-700);background:var(--green-100);padding:2px 9px;border-radius:20px;}
+  .form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px;}
+  label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;}
+  input,select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;font-family:'Sarabun',sans-serif;font-size:13.5px;background:#FDFCFA;color:var(--ink);}
+  input:focus,select:focus{outline:none;border-color:var(--green-700);}
+  .btn{all:unset;cursor:pointer;padding:9px 18px;border-radius:7px;font-size:13.5px;font-weight:600;background:var(--green-800);color:#fff;}
+  .btn:hover{background:var(--green-700);}
+  .btn:disabled{opacity:0.6;cursor:not-allowed;}
+  .btn.ghost{background:transparent;color:var(--danger);border:1px solid var(--danger);padding:6px 12px;font-size:12.5px;}
+  .btn.ghost:hover{background:#FBEEEC;}
+  .btn.small{padding:6px 12px;font-size:12.5px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;padding:9px 10px;color:var(--ink-soft);font-weight:600;font-size:12px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:10px 10px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;background:var(--gold-100);color:#7A5A18;font-weight:500;}
+  .empty{padding:26px;text-align:center;color:var(--ink-soft);font-size:13.5px;}
+  .table-wrap{overflow-x:auto;}
+  .row-actions{display:flex;gap:6px;}
+  .save-note{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .save-note b{color:var(--green-700);}
+  .error-banner{background:#FBEEEC;color:var(--danger);font-size:13px;padding:10px 14px;border-radius:7px;margin-bottom:16px;}
+  .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--green-900);padding:20px;}
+  .login-card{background:var(--card);border-radius:14px;padding:36px 34px;width:100%;max-width:360px;box-shadow:0 20px 50px rgba(0,0,0,0.25);}
+  .login-card .mark{width:38px;height:38px;background:var(--gold-500);border-radius:9px;color:var(--green-900);font-weight:700;text-align:center;line-height:38px;margin-bottom:14px;}
+  .login-card h2{margin:0 0 4px;font-size:20px;font-weight:600;}
+  .login-card p{margin:0 0 22px;color:var(--ink-soft);font-size:13px;}
+  .login-card .field{margin-bottom:14px;}
+  .login-card .btn{width:100%;text-align:center;margin-top:6px;}
+  .login-error{background:#FBEEEC;color:var(--danger);font-size:12.5px;padding:9px 12px;border-radius:7px;margin-bottom:14px;display:none;}
+  .login-hint{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-soft);line-height:1.7;}
+  .login-hint b{color:var(--ink);}
+  .role-pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.1);color:#fff;margin-top:2px;}
+  .role-pill.admin{background:var(--gold-500);color:var(--green-900);}
+  .logout-btn{all:unset;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.6);padding:4px 0;text-decoration:underline;}
+  .logout-btn:hover{color:#fff;}
+  .locked{display:flex;align-items:center;gap:8px;color:var(--ink-soft);background:var(--bg);border:1px dashed var(--line);border-radius:var(--radius);padding:16px;font-size:13px;}
+  .spinner-row{padding:26px;text-align:center;color:var(--ink-soft);font-size:13.5px;}
+  @media (max-width:860px){
+    .app{flex-direction:column;}
+    .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:14px;}
+    .brand{display:none;}
+    nav{flex-direction:row;padding:0;}
+    main{padding:22px;}
+    .grid-stats{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+<div id="loginRoot"></div>
+<div class="app" id="appRoot" style="display:none;">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">R</div>
+      <h1>RMUTR</h1>
+      <p>ระบบจัดการกิจกรรมในมหาวิทยาลัย</p>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sidebar-foot"><div id="userInfo"></div></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ========================================================================
+   API client — ไฟล์นี้เป็น frontend ล้วน คุยกับ backend ผ่าน REST API เท่านั้น
+   ข้อมูลทั้งหมดอยู่ใน MySQL ฝั่งเซิร์ฟเวอร์ ไม่มีการเก็บข้อมูลธุรกิจใน browser
+   เก็บไว้แค่ JWT token (สำหรับคงสถานะล็อกอิน) ใน localStorage
+   ======================================================================== */
+const API_BASE = ""; // ว่างไว้ = เรียก API จากโดเมนเดียวกับหน้านี้ (/api/...)
+const TOKEN_KEY = "rmutr_token";
+
+function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+async function api(path, options = {}) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  const token = getToken();
+  if (token) headers["Authorization"] = "Bearer " + token;
+  let res;
+  try {
+    res = await fetch(API_BASE + "/api" + path, { ...options, headers });
+  } catch (err) {
+    throw new Error("ติดต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบว่า backend กำลังรันอยู่");
+  }
+  if (res.status === 401) {
+    currentUser = null;
+    clearToken();
+    boot();
+    throw new Error("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+  }
+  if (res.status === 204) return null;
+  let data;
+  try { data = await res.json(); } catch(e) { data = null; }
+  if (!res.ok) {
+    throw new Error((data && data.error) || `เกิดข้อผิดพลาด (HTTP ${res.status})`);
+  }
+  return data;
+}
+
+/* ---------- Auth state ---------- */
+let currentUser = null; // { id, username, name, role: 'admin'|'staff'|'student', studentId }
+const ROLE_LABEL = { admin: "แอดมิน", staff: "อาจารย์/เจ้าหน้าที่", student: "นักศึกษา" };
+
+function isAdmin(){ return currentUser && currentUser.role === "admin"; }
+function pageAllowed(p){ return currentUser && p.roles.includes(currentUser.role); }
+
+function renderLogin(errorMsg){
+  document.getElementById("appRoot").style.display = "none";
+  const root = document.getElementById("loginRoot");
+  root.style.display = "flex";
+  root.innerHTML = `
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="mark">R</div>
+        <h2>เข้าสู่ระบบ RMUTR</h2>
+        <p>ระบบจัดการกิจกรรมในมหาวิทยาลัย</p>
+        <div class="login-error" id="loginError">${errorMsg || ""}</div>
+        <div class="field"><label>ชื่อผู้ใช้</label><input id="l_user" placeholder="username"></div>
+        <div class="field"><label>รหัสผ่าน</label><input id="l_pass" type="password" placeholder="password"></div>
+        <button class="btn" id="loginBtn">เข้าสู่ระบบ</button>
+        <div class="login-hint">
+          บัญชีทดลอง (หลังรัน <code>npm run seed</code> แล้ว):<br>
+          <b>แอดมิน</b> — admin / admin123<br>
+          <b>อาจารย์/เจ้าหน้าที่</b> — staff / staff123<br>
+          <b>นักศึกษา</b> — student1 / student123
+        </div>
+      </div>
+    </div>`;
+  if (errorMsg) document.getElementById("loginError").style.display = "block";
+
+  const doLogin = async () => {
+    const username = document.getElementById("l_user").value.trim();
+    const password = document.getElementById("l_pass").value;
+    const btn = document.getElementById("loginBtn");
+    btn.textContent = "กำลังเข้าสู่ระบบ...";
+    btn.disabled = true;
+    try {
+      const data = await api("/auth/login", { method: "POST", body: JSON.stringify({ username, password }) });
+      setToken(data.token);
+      currentUser = data.user;
+      boot();
+    } catch (err) {
+      renderLogin(err.message);
+    }
+  };
+  document.getElementById("loginBtn").onclick = doLogin;
+  document.getElementById("l_pass").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+}
+
+function logout(){
+  currentUser = null;
+  clearToken();
+  boot();
+}
+
+async function boot(){
+  const token = getToken();
+  if (!token) { renderLogin(); return; }
+  if (!currentUser) {
+    try {
+      const data = await api("/auth/me");
+      currentUser = data.user;
+    } catch (err) {
+      renderLogin();
+      return;
+    }
+  }
+  document.getElementById("loginRoot").style.display = "none";
+  document.getElementById("loginRoot").innerHTML = "";
+  document.getElementById("appRoot").style.display = "flex";
+  const allowed = pages.filter(pageAllowed);
+  if (!allowed.find(p => p.id === current)) current = allowed[0] ? allowed[0].id : "dashboard";
+  render();
+}
+
+/* ---------- Navigation ---------- */
+const pages = [
+  { id: "dashboard", label: "ภาพรวม", roles: ["admin", "staff"] },
+  { id: "activities", label: "จัดการกิจกรรม", roles: ["admin"] },
+  { id: "teachers", label: "จัดการอาจารย์", roles: ["admin"] },
+  { id: "students", label: "จัดการนักศึกษา", roles: ["admin"] },
+  { id: "participation", label: "บันทึกผลเข้าร่วม", roles: ["admin", "staff"] },
+  { id: "reports", label: "รายงาน", roles: ["admin", "staff"] },
+  { id: "users", label: "จัดการผู้ใช้งาน", roles: ["admin"] },
+  { id: "myinfo", label: "ข้อมูลของฉัน", roles: ["student"] },
+];
+let current = "dashboard";
+
+function renderNav(){
+  const nav = document.getElementById("nav");
+  nav.innerHTML = "";
+  pages.filter(pageAllowed).forEach(p => {
+    const b = document.createElement("button");
+    b.className = p.id === current ? "active" : "";
+    b.innerHTML = '<span class="dot"></span>' + p.label;
+    b.onclick = () => { current = p.id; render(); };
+    nav.appendChild(b);
+  });
+  const info = document.getElementById("userInfo");
+  if (info) {
+    info.innerHTML = `
+      <div style="font-size:13px;color:#fff;margin-bottom:2px;">${currentUser.name}</div>
+      <span class="role-pill ${isAdmin() ? 'admin' : ''}">${ROLE_LABEL[currentUser.role]}</span>
+      <div style="margin-top:10px;"><button class="logout-btn" id="logoutBtn">ออกจากระบบ</button></div>`;
+    document.getElementById("logoutBtn").onclick = logout;
+  }
+}
+
+function head(main, eyebrow, title, desc){
+  const h = document.createElement("div");
+  h.className = "page-head";
+  h.innerHTML = `<div class="eyebrow">${eyebrow}</div><h2>${title}</h2><p>${desc}</p>`;
+  main.appendChild(h);
+}
+function showError(main, err){
+  const e = document.createElement("div");
+  e.className = "error-banner";
+  e.textContent = err.message || String(err);
+  main.prepend(e);
+}
+function loading(main){
+  main.innerHTML = '<div class="spinner-row">กำลังโหลดข้อมูล...</div>';
+}
+
+async function render(){
+  const pageDef = pages.find(p => p.id === current);
+  if (pageDef && !pageAllowed(pageDef)) {
+    const allowed = pages.filter(pageAllowed);
+    current = allowed[0] ? allowed[0].id : "dashboard";
+  }
+  renderNav();
+  const main = document.getElementById("main");
+  const fn = {
+    dashboard: renderDashboard, activities: renderActivities, teachers: renderTeachers,
+    students: renderStudents, participation: renderParticipation, reports: renderReports,
+    users: renderUsers, myinfo: renderMyInfo,
+  }[current];
+  loading(main);
+  try {
+    await fn(main);
+  } catch (err) {
+    main.innerHTML = "";
+    showError(main, err);
+  }
+}
+
+/* ---------- Dashboard ---------- */
+async function renderDashboard(main){
+  const d = await api("/reports/dashboard");
+  main.innerHTML = "";
+  head(main, "ภาพรวมระบบ", "แดชบอร์ด", "สรุปสถานะกิจกรรมในมหาวิทยาลัยแบบเรียลไทม์จากฐานข้อมูล");
+  const stats = document.createElement("div");
+  stats.className = "grid-stats";
+  stats.innerHTML = `
+    <div class="stat"><div class="num">${d.totalActivities}</div><div class="label">กิจกรรมทั้งหมด</div></div>
+    <div class="stat"><div class="num">${d.totalStudents}</div><div class="label">นักศึกษาในระบบ</div></div>
+    <div class="stat"><div class="num">${d.totalTeachers}</div><div class="label">อาจารย์ผู้ดูแล</div></div>
+    <div class="stat"><div class="num">${d.totalHours}</div><div class="label">ชั่วโมงกิจกรรมสะสมรวม</div></div>`;
+  main.appendChild(stats);
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<h3>กิจกรรมล่าสุด</h3>`;
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  if (d.recentActivities.length === 0) {
+    wrap.innerHTML = `<div class="empty">ยังไม่มีกิจกรรม</div>`;
+  } else {
+    const rows = d.recentActivities.map(a => `
+      <tr><td>${a.name}</td><td><span class="tag">${a.type_name}</span></td>
+      <td>${a.activity_date || "-"}</td><td>${a.year_label}</td></tr>`).join("");
+    wrap.innerHTML = `<table><thead><tr><th>ชื่อกิจกรรม</th><th>ประเภท</th><th>วันที่</th><th>ปีการศึกษา</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  panel.appendChild(wrap);
+  main.appendChild(panel);
+}
+
+/* ---------- Activities ---------- */
+async function renderActivities(main){
+  const [activities, types, years] = await Promise.all([
+    api("/activities"), api("/activity-types"), api("/academic-years"),
+  ]);
+  main.innerHTML = "";
+  head(main, "ฟังก์ชันหลัก", "จัดการกิจกรรม", "เพิ่ม แก้ไข หรือลบกิจกรรม พร้อมกำหนดประเภท วันที่ เวลา และสถานที่");
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<h3>เพิ่มกิจกรรมใหม่</h3>`;
+  const form = document.createElement("div");
+  if (types.length === 0 || years.length === 0) {
+    form.innerHTML = `<div class="empty">ต้องมีประเภทกิจกรรมและปีการศึกษาอย่างน้อยอย่างละ 1 รายการก่อน (เพิ่มได้จากฐานข้อมูล หรือ API /api/activity-types, /api/academic-years)</div>`;
+  } else {
+    form.innerHTML = `
+      <div class="form-row">
+        <div><label>ชื่อกิจกรรม</label><input id="f_name" placeholder="เช่น ค่ายวิทยาศาสตร์"></div>
+        <div><label>ประเภทกิจกรรม</label><select id="f_type">${types.map(t=>`<option value="${t.id}">${t.name}</option>`).join("")}</select></div>
+        <div><label>ปีการศึกษา</label><select id="f_year">${years.map(y=>`<option value="${y.id}">${y.label}</option>`).join("")}</select></div>
+      </div>
+      <div class="form-row">
+        <div><label>วันที่</label><input id="f_date" type="date"></div>
+        <div><label>เวลา</label><input id="f_time" type="time"></div>
+        <div><label>สถานที่</label><input id="f_loc" placeholder="เช่น หอประชุม"></div>
+      </div>
+      <button class="btn" id="addActivity">+ เพิ่มกิจกรรม</button>`;
+  }
+  panel.appendChild(form);
+  main.appendChild(panel);
+
+  const addBtn = document.getElementById("addActivity");
+  if (addBtn) addBtn.onclick = async () => {
+    const name = document.getElementById("f_name").value.trim();
+    if (!name) { alert("กรุณากรอกชื่อกิจกรรม"); return; }
+    try {
+      await api("/activities", { method: "POST", body: JSON.stringify({
+        name, typeId: document.getElementById("f_type").value, yearId: document.getElementById("f_year").value,
+        date: document.getElementById("f_date").value, time: document.getElementById("f_time").value,
+        location: document.getElementById("f_loc").value,
+      })});
+      render();
+    } catch (err) { alert(err.message); }
+  };
+
+  const listPanel = document.createElement("div");
+  listPanel.className = "panel";
+  listPanel.innerHTML = `<h3>รายการกิจกรรม <span class="badge">${activities.length} รายการ</span></h3>`;
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  if (activities.length === 0) {
+    wrap.innerHTML = `<div class="empty">ยังไม่มีกิจกรรม เพิ่มกิจกรรมแรกด้านบน</div>`;
+  } else {
+    const rows = activities.map(a => `
+      <tr><td>${a.name}</td><td><span class="tag">${a.type_name}</span></td>
+      <td>${a.activity_date || "-"} ${a.activity_time || ""}</td><td>${a.location || "-"}</td><td>${a.year_label}</td>
+      <td class="row-actions"><button class="btn ghost" data-id="${a.id}">ลบ</button></td></tr>`).join("");
+    wrap.innerHTML = `<table><thead><tr><th>ชื่อกิจกรรม</th><th>ประเภท</th><th>วันเวลา</th><th>สถานที่</th><th>ปีการศึกษา</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  listPanel.appendChild(wrap);
+  main.appendChild(listPanel);
+  wrap.querySelectorAll("button[data-id]").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("ลบกิจกรรมนี้? ประวัติเข้าร่วมและการมอบหมายอาจารย์ที่เกี่ยวข้องจะถูกลบไปด้วย")) return;
+      try { await api(`/activities/${b.dataset.id}`, { method: "DELETE" }); render(); }
+      catch (err) { alert(err.message); }
+    };
+  });
+}
+
+/* ---------- Teachers ---------- */
+async function renderTeachers(main){
+  const [teachers, activities] = await Promise.all([api("/teachers"), api("/activities")]);
+  main.innerHTML = "";
+  head(main, "ฟังก์ชันหลัก", "จัดการอาจารย์", "เพิ่มอาจารย์ที่ปรึกษากิจกรรม และมอบหมายหน้าที่ในแต่ละกิจกรรม");
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<h3>เพิ่มอาจารย์</h3>
+    <div class="form-row"><div><label>ชื่อ-นามสกุล</label><input id="t_name" placeholder="เช่น อาจารย์สมศรี ใจงาม"></div></div>
+    <button class="btn" id="addTeacher">+ เพิ่มอาจารย์</button>`;
+  main.appendChild(panel);
+  document.getElementById("addTeacher").onclick = async () => {
+    const name = document.getElementById("t_name").value.trim();
+    if (!name) { alert("กรุณากรอกชื่ออาจารย์"); return; }
+    try { await api("/teachers", { method: "POST", body: JSON.stringify({ name }) }); render(); }
+    catch (err) { alert(err.message); }
+  };
+
+  const assignPanel = document.createElement("div");
+  assignPanel.className = "panel";
+  assignPanel.innerHTML = `<h3>มอบหมายอาจารย์ดูแลกิจกรรม</h3>`;
+  const af = document.createElement("div");
+  if (activities.length === 0 || teachers.length === 0) {
+    af.innerHTML = `<div class="empty">ต้องมีทั้งอาจารย์และกิจกรรมอย่างน้อยอย่างละ 1 รายการก่อน</div>`;
+  } else {
+    af.innerHTML = `
+      <div class="form-row">
+        <div><label>กิจกรรม</label><select id="a_activity">${activities.map(a=>`<option value="${a.id}">${a.name}</option>`).join("")}</select></div>
+        <div><label>อาจารย์</label><select id="a_teacher">${teachers.map(t=>`<option value="${t.id}">${t.name}</option>`).join("")}</select></div>
+        <div><label>หน้าที่</label><input id="a_role" placeholder="เช่น หัวหน้ากิจกรรม"></div>
+      </div>
+      <button class="btn" id="addAssign">+ มอบหมาย</button>`;
+  }
+  assignPanel.appendChild(af);
+  main.appendChild(assignPanel);
+  const addAssignBtn = document.getElementById("addAssign");
+  if (addAssignBtn) addAssignBtn.onclick = async () => {
+    try {
+      await api("/teachers/assign", { method: "POST", body: JSON.stringify({
+        activityId: document.getElementById("a_activity").value,
+        teacherId: document.getElementById("a_teacher").value,
+        role: document.getElementById("a_role").value.trim() || "ผู้ดูแล",
+      })});
+      render();
+    } catch (err) { alert(err.message); }
+  };
+
+  const listPanel = document.createElement("div");
+  listPanel.className = "panel";
+  listPanel.innerHTML = `<h3>รายชื่ออาจารย์ <span class="badge">${teachers.length} คน</span></h3>`;
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  if (teachers.length === 0) {
+    wrap.innerHTML = `<div class="empty">ยังไม่มีอาจารย์ในระบบ</div>`;
+  } else {
+    const rows = teachers.map(t => {
+      const assigns = t.assignments.map(a => `${a.activityName} (${a.role})`).join(", ") || "-";
+      return `<tr><td>${t.name}</td><td>${assigns}</td>
+        <td class="row-actions"><button class="btn ghost" data-id="${t.id}">ลบ</button></td></tr>`;
+    }).join("");
+    wrap.innerHTML = `<table><thead><tr><th>ชื่ออาจารย์</th><th>กิจกรรมที่ดูแล</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  listPanel.appendChild(wrap);
+  main.appendChild(listPanel);
+  wrap.querySelectorAll("button[data-id]").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("ลบอาจารย์คนนี้?")) return;
+      try { await api(`/teachers/${b.dataset.id}`, { method: "DELETE" }); render(); }
+      catch (err) { alert(err.message); }
+    };
+  });
+}
+
+/* ---------- Students ---------- */
+async function renderStudents(main){
+  const [students, participations] = await Promise.all([api("/students"), api("/participation")]);
+  main.innerHTML = "";
+  head(main, "ฟังก์ชันหลัก", "จัดการนักศึกษา", "ลงทะเบียนนักศึกษาในระบบ และตรวจสอบประวัติการเข้าร่วมกิจกรรมย้อนหลัง");
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<h3>เพิ่มนักศึกษา</h3>
+    <div class="form-row">
+      <div><label>ชื่อ-นามสกุล</label><input id="s_name" placeholder="เช่น สมชาย ใจดี"></div>
+      <div><label>คณะ/สาขาวิชา</label><input id="s_major" placeholder="เช่น วิศวกรรมคอมพิวเตอร์"></div>
+    </div>
+    <button class="btn" id="addStudent">+ เพิ่มนักศึกษา</button>`;
+  main.appendChild(panel);
+  document.getElementById("addStudent").onclick = async () => {
+    const name = document.getElementById("s_name").value.trim();
+    if (!name) { alert("กรุณากรอกชื่อนักศึกษา"); return; }
+    try {
+      await api("/students", { method: "POST", body: JSON.stringify({
+        name, major: document.getElementById("s_major").value.trim(),
+      })});
+      render();
+    } catch (err) { alert(err.message); }
+  };
+
+  const listPanel = document.createElement("div");
+  listPanel.className = "panel";
+  listPanel.innerHTML = `<h3>รายชื่อนักศึกษา <span class="badge">${students.length} คน</span></h3>`;
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  if (students.length === 0) {
+    wrap.innerHTML = `<div class="empty">ยังไม่มีนักศึกษาในระบบ</div>`;
+  } else {
+    const rows = students.map(s => {
+      const hist = participations.filter(p => p.student_id === s.id).map(p => p.activity_name).join(", ") || "-";
+      return `<tr><td>${s.name}</td><td>${s.major}</td><td>${hist}</td>
+        <td class="row-actions"><button class="btn ghost" data-id="${s.id}">ลบ</button></td></tr>`;
+    }).join("");
+    wrap.innerHTML = `<table><thead><tr><th>ชื่อนักศึกษา</th><th>สาขาวิชา</th><th>ประวัติกิจกรรม</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  listPanel.appendChild(wrap);
+  main.appendChild(listPanel);
+  wrap.querySelectorAll("button[data-id]").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("ลบนักศึกษาคนนี้? ประวัติการเข้าร่วมจะถูกลบไปด้วย")) return;
+      try { await api(`/students/${b.dataset.id}`, { method: "DELETE" }); render(); }
+      catch (err) { alert(err.message); }
+    };
+  });
+}
+
+/* ---------- Participation ---------- */
+async function renderParticipation(main){
+  const [students, activities, participations] = await Promise.all([
+    api("/students"), api("/activities"), api("/participation"),
+  ]);
+  main.innerHTML = "";
+  head(main, "ฟังก์ชันหลัก", "บันทึกผลเข้าร่วมกิจกรรม", "ลงชื่อนักศึกษาเข้าร่วมกิจกรรม ให้คะแนน และสะสมชั่วโมงกิจกรรม");
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<h3>บันทึกใหม่</h3>`;
+  const form = document.createElement("div");
+  if (students.length === 0 || activities.length === 0) {
+    form.innerHTML = `<div class="empty">ต้องมีทั้งนักศึกษาและกิจกรรมอย่างน้อยอย่างละ 1 รายการก่อน</div>`;
+  } else {
+    form.innerHTML = `
+      <div class="form-row">
+        <div><label>นักศึกษา</label><select id="p_student">${students.map(s=>`<option value="${s.id}">${s.name}</option>`).join("")}</select></div>
+        <div><label>กิจกรรม</label><select id="p_activity">${activities.map(a=>`<option value="${a.id}">${a.name}</option>`).join("")}</select></div>
+        <div><label>สถานะ</label><select id="p_status"><option>ลงทะเบียน</option><option>เข้าร่วมแล้ว</option><option>ไม่มา</option></select></div>
+      </div>
+      <div class="form-row">
+        <div><label>คะแนนจิตพิสัย</label><input id="p_score" type="number" value="0" min="0"></div>
+        <div><label>ชั่วโมงที่ได้</label><input id="p_hours" type="number" value="0" min="0"></div>
+        <div><label>วันที่บันทึก</label><input id="p_date" type="date"></div>
+      </div>
+      <button class="btn" id="addPart">+ บันทึกผล</button>`;
+  }
+  panel.appendChild(form);
+  main.appendChild(panel);
+  const addBtn = document.getElementById("addPart");
+  if (addBtn) addBtn.onclick = async () => {
+    try {
+      await api("/participation", { method: "POST", body: JSON.stringify({
+        studentId: document.getElementById("p_student").value,
+        activityId: document.getElementById("p_activity").value,
+        status: document.getElementById("p_status").value,
+        score: document.getElementById("p_score").value,
+        hours: document.getElementById("p_hours").value,
+        date: document.getElementById("p_date").value,
+      })});
+      render();
+    } catch (err) { alert(err.message); }
+  };
+
+  const listPanel = document.createElement("div");
+  listPanel.className = "panel";
+  listPanel.innerHTML = `<h3>ประวัติการเข้าร่วม <span class="badge">${participations.length} รายการ</span></h3>`;
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  if (participations.length === 0) {
+    wrap.innerHTML = `<div class="empty">ยังไม่มีการบันทึกผล</div>`;
+  } else {
+    const rows = participations.map(p => `
+      <tr><td>${p.student_name}</td><td>${p.activity_name}</td><td><span class="tag">${p.status}</span></td>
+      <td>${p.score}</td><td>${p.hours}</td><td>${p.record_date || "-"}</td>
+      <td class="row-actions"><button class="btn ghost" data-sid="${p.student_id}" data-aid="${p.activity_id}">ลบ</button></td></tr>`).join("");
+    wrap.innerHTML = `<table><thead><tr><th>นักศึกษา</th><th>กิจกรรม</th><th>สถานะ</th><th>คะแนน</th><th>ชั่วโมง</th><th>วันที่</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  listPanel.appendChild(wrap);
+  main.appendChild(listPanel);
+  wrap.querySelectorAll("button[data-sid]").forEach(b => {
+    b.onclick = async () => {
+      try { await api(`/participation/${b.dataset.sid}/${b.dataset.aid}`, { method: "DELETE" }); render(); }
+      catch (err) { alert(err.message); }
+    };
+  });
+}
+
+/* ---------- Reports ---------- */
+async function renderReports(main){
+  const [activityStats, studentStats] = await Promise.all([
+    api("/reports/activities"), api("/reports/students"),
+  ]);
+  main.innerHTML = "";
+  head(main, "สรุปข้อมูล", "รายงาน", "สรุปกิจกรรมที่จัด สถิติการเข้าร่วม และคะแนน/ชั่วโมงสะสมของนักศึกษา");
+
+  const p1 = document.createElement("div");
+  p1.className = "panel";
+  p1.innerHTML = `<h3>สรุปกิจกรรม</h3>`;
+  const w1 = document.createElement("div");
+  w1.className = "table-wrap";
+  if (activityStats.length === 0) {
+    w1.innerHTML = `<div class="empty">ยังไม่มีกิจกรรม</div>`;
+  } else {
+    const rows = activityStats.map(a => `
+      <tr><td>${a.name}</td><td><span class="tag">${a.type_name}</span></td>
+      <td>${a.total_registered}</td><td>${a.total_attended || 0}</td><td>${a.avg_score ?? "-"}</td></tr>`).join("");
+    w1.innerHTML = `<table><thead><tr><th>กิจกรรม</th><th>ประเภท</th><th>ผู้ลงทะเบียน</th><th>เข้าร่วมแล้ว</th><th>คะแนนเฉลี่ย</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  p1.appendChild(w1);
+  main.appendChild(p1);
+
+  const p2 = document.createElement("div");
+  p2.className = "panel";
+  p2.innerHTML = `<h3>คะแนน/ชั่วโมงสะสมของนักศึกษา</h3>`;
+  const w2 = document.createElement("div");
+  w2.className = "table-wrap";
+  if (studentStats.length === 0) {
+    w2.innerHTML = `<div class="empty">ยังไม่มีนักศึกษา</div>`;
+  } else {
+    const rows = studentStats.map(s => `
+      <tr><td>${s.name}</td><td>${s.major}</td><td>${s.total_activities}</td><td>${s.total_score}</td><td>${s.total_hours}</td></tr>`).join("");
+    w2.innerHTML = `<table><thead><tr><th>นักศึกษา</th><th>สาขาวิชา</th><th>จำนวนกิจกรรม</th><th>คะแนนสะสม</th><th>ชั่วโมงสะสม</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  p2.appendChild(w2);
+  main.appendChild(p2);
+}
+
+/* ---------- Users (admin) ---------- */
+async function renderUsers(main){
+  const [users, students] = await Promise.all([api("/users"), api("/students")]);
+  main.innerHTML = "";
+  head(main, "สิทธิ์การใช้งาน", "จัดการผู้ใช้งาน", "กำหนดบัญชีผู้ใช้ระบบ และแบ่งสิทธิ์ระหว่างแอดมิน อาจารย์ และนักศึกษา");
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.innerHTML = `<h3>เพิ่มผู้ใช้งาน</h3>
+    <div class="form-row">
+      <div><label>ชื่อ-นามสกุล</label><input id="u_name" placeholder="เช่น อาจารย์วิชัย พัฒนกิจ"></div>
+      <div><label>ชื่อผู้ใช้ (username)</label><input id="u_username" placeholder="เช่น wichai"></div>
+      <div><label>รหัสผ่าน</label><input id="u_password" type="text" placeholder="ตั้งรหัสผ่าน"></div>
+      <div><label>สิทธิ์การใช้งาน</label><select id="u_role"><option value="staff">อาจารย์/เจ้าหน้าที่</option><option value="admin">แอดมิน</option><option value="student">นักศึกษา</option></select></div>
+    </div>
+    <div class="form-row" id="linkStudentRow" style="display:none;">
+      <div><label>ผูกกับนักศึกษาคนไหน</label><select id="u_student">${students.map(s=>`<option value="${s.id}">${s.name} (${s.major})</option>`).join("")}</select></div>
+    </div>
+    <button class="btn" id="addUser">+ เพิ่มผู้ใช้งาน</button>`;
+  main.appendChild(panel);
+
+  document.getElementById("u_role").addEventListener("change", e => {
+    document.getElementById("linkStudentRow").style.display = e.target.value === "student" ? "grid" : "none";
+  });
+  document.getElementById("addUser").onclick = async () => {
+    const name = document.getElementById("u_name").value.trim();
+    const username = document.getElementById("u_username").value.trim();
+    const password = document.getElementById("u_password").value;
+    const role = document.getElementById("u_role").value;
+    if (!name || !username || !password) { alert("กรุณากรอกข้อมูลให้ครบ"); return; }
+    if (role === "student" && students.length === 0) { alert("ต้องมีข้อมูลนักศึกษาในระบบก่อน"); return; }
+    try {
+      await api("/users", { method: "POST", body: JSON.stringify({
+        name, username, password, role,
+        studentId: role === "student" ? document.getElementById("u_student").value : undefined,
+      })});
+      render();
+    } catch (err) { alert(err.message); }
+  };
+
+  const listPanel = document.createElement("div");
+  listPanel.className = "panel";
+  listPanel.innerHTML = `<h3>รายชื่อผู้ใช้งาน <span class="badge">${users.length} บัญชี</span></h3>`;
+  const wrap = document.createElement("div");
+  wrap.className = "table-wrap";
+  const rows = users.map(u => `
+    <tr><td>${u.name}</td><td>${u.username}</td>
+    <td><span class="tag" style="${u.role==='admin'?'background:var(--gold-100);color:#7A5A18;':''}">${ROLE_LABEL[u.role]}</span></td>
+    <td>${u.student_name || "-"}</td>
+    <td class="row-actions">${u.id===currentUser.id ? '<span style="font-size:12px;color:var(--ink-soft);">บัญชีของคุณ</span>' : `<button class="btn ghost" data-id="${u.id}">ลบ</button>`}</td></tr>`).join("");
+  wrap.innerHTML = `<table><thead><tr><th>ชื่อ</th><th>ชื่อผู้ใช้</th><th>สิทธิ์</th><th>ผูกกับนักศึกษา</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  listPanel.appendChild(wrap);
+  main.appendChild(listPanel);
+  wrap.querySelectorAll("button[data-id]").forEach(b => {
+    b.onclick = async () => {
+      if (!confirm("ลบผู้ใช้งานนี้?")) return;
+      try { await api(`/users/${b.dataset.id}`, { method: "DELETE" }); render(); }
+      catch (err) { alert(err.message); }
+    };
+  });
+}
+
+/* ---------- My Info (student) ---------- */
+async function renderMyInfo(main){
+  const [students, activities, participations] = await Promise.all([
+    api("/students"), api("/activities"), api("/participation"),
+  ]);
+  const s = students[0];
+  main.innerHTML = "";
+  head(main, "บัญชีของฉัน", "ข้อมูลของฉัน", "ตรวจสอบข้อมูลส่วนตัว ลงทะเบียนกิจกรรม และดูประวัติการเข้าร่วมย้อนหลัง");
+
+  if (!s) {
+    main.innerHTML += `<div class="panel"><div class="locked">บัญชีนี้ยังไม่ได้ผูกกับข้อมูลนักศึกษาในระบบ กรุณาแจ้งแอดมิน</div></div>`;
+    return;
+  }
+
+  const totalScore = participations.reduce((sum, p) => sum + Number(p.score), 0);
+  const totalHours = participations.reduce((sum, p) => sum + Number(p.hours), 0);
+
+  const stats = document.createElement("div");
+  stats.className = "grid-stats";
+  stats.innerHTML = `
+    <div class="stat"><div class="num" style="font-size:16px;">${s.major}</div><div class="label">${s.name}</div></div>
+    <div class="stat"><div class="num">${participations.length}</div><div class="label">กิจกรรมที่เข้าร่วม</div></div>
+    <div class="stat"><div class="num">${totalScore}</div><div class="label">คะแนนสะสม</div></div>
+    <div class="stat"><div class="num">${totalHours}</div><div class="label">ชั่วโมงสะสม</div></div>`;
+  main.appendChild(stats);
+
+  const registeredIds = new Set(participations.map(p => p.activity_id));
+  const open = activities.filter(a => !registeredIds.has(a.id));
+  const openPanel = document.createElement("div");
+  openPanel.className = "panel";
+  openPanel.innerHTML = `<h3>กิจกรรมที่เปิดรับลงทะเบียน</h3>`;
+  const w1 = document.createElement("div");
+  w1.className = "table-wrap";
+  if (open.length === 0) {
+    w1.innerHTML = `<div class="empty">ไม่มีกิจกรรมใหม่ที่เปิดรับ หรือคุณลงทะเบียนครบแล้ว</div>`;
+  } else {
+    const rows = open.map(a => `
+      <tr><td>${a.name}</td><td><span class="tag">${a.type_name}</span></td>
+      <td>${a.activity_date || "-"} ${a.activity_time || ""}</td><td>${a.location || "-"}</td>
+      <td class="row-actions"><button class="btn small" data-id="${a.id}">ลงทะเบียน</button></td></tr>`).join("");
+    w1.innerHTML = `<table><thead><tr><th>กิจกรรม</th><th>ประเภท</th><th>วันเวลา</th><th>สถานที่</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  openPanel.appendChild(w1);
+  main.appendChild(openPanel);
+  w1.querySelectorAll("button[data-id]").forEach(b => {
+    b.onclick = async () => {
+      try { await api("/participation/self-register", { method: "POST", body: JSON.stringify({ activityId: b.dataset.id }) }); render(); }
+      catch (err) { alert(err.message); }
+    };
+  });
+
+  const histPanel = document.createElement("div");
+  histPanel.className = "panel";
+  histPanel.innerHTML = `<h3>ประวัติการเข้าร่วมของฉัน <span class="badge">${participations.length} รายการ</span></h3>`;
+  const w2 = document.createElement("div");
+  w2.className = "table-wrap";
+  if (participations.length === 0) {
+    w2.innerHTML = `<div class="empty">ยังไม่มีประวัติการเข้าร่วมกิจกรรม</div>`;
+  } else {
+    const rows = participations.map(p => `
+      <tr><td>${p.activity_name}</td><td><span class="tag">${p.status}</span></td>
+      <td>${p.score}</td><td>${p.hours}</td><td>${p.record_date || "-"}</td></tr>`).join("");
+    w2.innerHTML = `<table><thead><tr><th>กิจกรรม</th><th>สถานะ</th><th>คะแนน</th><th>ชั่วโมง</th><th>วันที่</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  histPanel.appendChild(w2);
+  main.appendChild(histPanel);
+}
+
+boot();
+</script>
+</body>
+</html>
