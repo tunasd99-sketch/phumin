@@ -170,12 +170,6 @@ function renderLogin(errorMsg){
         <div class="field"><label>ชื่อผู้ใช้</label><input id="l_user" placeholder="username"></div>
         <div class="field"><label>รหัสผ่าน</label><input id="l_pass" type="password" placeholder="password"></div>
         <button class="btn" id="loginBtn">เข้าสู่ระบบ</button>
-        <div class="login-hint">
-          บัญชีทดลอง (หลังรัน <code>npm run seed</code> แล้ว):<br>
-          <b>แอดมิน</b> — admin / admin123<br>
-          <b>อาจารย์/เจ้าหน้าที่</b> — staff / staff123<br>
-          <b>นักศึกษา</b> — student1 / student123
-        </div>
       </div>
     </div>`;
   if (errorMsg) document.getElementById("loginError").style.display = "block";
