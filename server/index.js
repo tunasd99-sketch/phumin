@@ -65,6 +65,18 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`RMUTR SAMS API กำลังรันที่พอร์ต ${PORT}`);
-});
+
+async function start() {
+  if (process.env.AUTO_SETUP === "true") {
+    try {
+      await require("./setup")();
+    } catch (err) {
+      console.error("AUTO_SETUP ล้มเหลว:", err.message);
+    }
+  }
+  app.listen(PORT, () => {
+    console.log(`RMUTR SAMS API กำลังรันที่พอร์ต ${PORT}`);
+  });
+}
+
+start();

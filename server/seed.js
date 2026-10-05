@@ -73,8 +73,12 @@ async function seed() {
     console.error("เกิดข้อผิดพลาด:", err.message);
   } finally {
     conn.release();
-    pool.end();
   }
 }
 
-seed();
+module.exports = seed;
+
+// รันตรงๆ ด้วย `npm run seed` -> ปิด pool เมื่อเสร็จ / ถ้าถูก require จาก setup.js จะไม่ปิด
+if (require.main === module) {
+  seed().finally(() => pool.end());
+}
